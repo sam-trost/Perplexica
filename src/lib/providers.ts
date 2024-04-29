@@ -1,11 +1,19 @@
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ChatOpenAI, OpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ChatGroq } from '@langchain/groq';
 import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { OllamaEmbeddings } from '@langchain/community/embeddings/ollama';
-import { getOllamaApiEndpoint, getOpenaiApiKey } from '../config';
+import {
+  getEmbeddingsModel,
+  getEmbeddingsProvider,
+  getGroqApiKey,
+  getOllamaApiEndpoint,
+  getOpenaiApiKey,
+} from '../config';
 
 export const getAvailableProviders = async () => {
   const openAIApiKey = getOpenaiApiKey();
   const ollamaEndpoint = getOllamaApiEndpoint();
+  const groqApiKey = getGroqApiKey();
 
   const models = {};
 
@@ -48,15 +56,55 @@ export const getAvailableProviders = async () => {
       }, {});
 
       if (Object.keys(models['ollama']).length > 0) {
-        models['ollama']['embeddings'] = new OllamaEmbeddings({
-          baseUrl: ollamaEndpoint,
-          model: models['ollama'][Object.keys(models['ollama'])[0]].model,
-        });
+        models['ollama']['embeddings'] = getEmbeddings();
       }
     } catch (err) {
       console.log(`Error loading Ollama models: ${err}`);
     }
   }
 
+  if (groqApiKey) {
+    try {
+      const groqModels = [
+        'llama3-8b-8192',
+        'llama3-70b-8192',
+        'mixtral-8x7b-32768',
+        'gemma-7b-it',
+      ];
+      models['groq'] = groqModels.reduce((acc, model) => {
+        acc[model] = new ChatGroq({
+          apiKey: groqApiKey,
+          model: model,
+          temperature: 0.7,
+        });
+        return acc;
+      }, {});
+
+      if (Object.keys(models['groq']).length > 0) {
+        models['groq']['embeddings'] = getEmbeddings();
+      }
+    } catch (err) {
+      console.log(`Error loading Groq models: ${err}`);
+    }
+  }
+
   return models;
+};
+
+const getEmbeddings = () => {
+  const provider = getEmbeddingsProvider();
+  const model = getEmbeddingsModel();
+  switch (provider) {
+    case 'ollama':
+      return new OllamaEmbeddings({
+        baseUrl: getOllamaApiEndpoint(),
+        model,
+      });
+    case 'openai':
+    default:
+      return new OpenAIEmbeddings({
+        openAIApiKey: getOpenaiApiKey(),
+        model,
+      });
+  }
 };

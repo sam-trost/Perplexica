@@ -10,9 +10,12 @@ interface Config {
     SIMILARITY_MEASURE: string;
     CHAT_MODEL_PROVIDER: string;
     CHAT_MODEL: string;
+    EMBEDDINGS_MODEL_PROVIDER: string;
+    EMBEDDINGS_MODEL: string;
   };
   API_KEYS: {
     OPENAI: string;
+    GROQ: string;
   };
   API_ENDPOINTS: {
     SEARXNG: string;
@@ -37,9 +40,14 @@ export const getSimilarityMeasure = () =>
 export const getChatModelProvider = () =>
   loadConfig().GENERAL.CHAT_MODEL_PROVIDER;
 
+export const getEmbeddingsProvider = () =>
+  loadConfig().GENERAL.EMBEDDINGS_MODEL_PROVIDER;
+
 export const getChatModel = () => loadConfig().GENERAL.CHAT_MODEL;
 
 export const getOpenaiApiKey = () => loadConfig().API_KEYS.OPENAI;
+
+export const getGroqApiKey = () => loadConfig().API_KEYS.GROQ;
 
 export const getSearxngApiEndpoint = () => loadConfig().API_ENDPOINTS.SEARXNG;
 

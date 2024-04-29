@@ -3,6 +3,8 @@ import { getAvailableProviders } from '../lib/providers';
 import {
   getChatModel,
   getChatModelProvider,
+  getEmbeddingsProvider,
+  getGroqApiKey,
   getOllamaApiEndpoint,
   getOpenaiApiKey,
   updateConfig,
@@ -27,9 +29,11 @@ router.get('/', async (_, res) => {
 
   config['selectedProvider'] = getChatModelProvider();
   config['selectedChatModel'] = getChatModel();
+  config['selectedEmbeddingsProvider'] = getEmbeddingsProvider();
 
   config['openeaiApiKey'] = getOpenaiApiKey();
   config['ollamaApiUrl'] = getOllamaApiEndpoint();
+  config['groqApiKey'] = getGroqApiKey();
 
   res.status(200).json(config);
 });

@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
-    "@langchain/openai": "^0.0.25",
+    "@langchain/groq": "^0.0.8",
+    "@langchain/openai": "^0.0.28",
     "axios": "^1.6.8",
     "compute-cosine-similarity": "^1.1.0",
     "compute-dot": "^1.1.0",

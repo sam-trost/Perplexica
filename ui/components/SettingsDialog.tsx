@@ -8,8 +8,9 @@ interface SettingsType {
   };
   selectedProvider: string;
   selectedChatModel: string;
-  openeaiApiKey: string;
+  openaiApiKey: string;
   ollamaApiUrl: string;
+  groqApiKey: string;
 }
 
 const SettingsDialog = ({
@@ -93,10 +94,10 @@ const SettingsDialog = ({
                   Settings
                 </Dialog.Title>
                 {config && !isLoading && (
-                  <div className="flex flex-col space-y-4 mt-6">
+                  <div className="flex flex-col mt-6 space-y-4">
                     {config.providers && (
                       <div className="flex flex-col space-y-1">
-                        <p className="text-white/70 text-sm">
+                        <p className="text-sm text-white/70">
                           Chat model Provider
                         </p>
                         <select
@@ -165,15 +166,30 @@ const SettingsDialog = ({
                       </div>
                     )}
                     <div className="flex flex-col space-y-1">
-                      <p className="text-white/70 text-sm">OpenAI API Key</p>
+                      <p className="text-sm text-white/70">Groq API Key</p>
                       <input
                         type="text"
-                        placeholder="OpenAI API Key"
-                        defaultValue={config.openeaiApiKey}
+                        placeholder="Groq API Key"
+                        defaultValue={config.groqApiKey}
                         onChange={(e) =>
                           setConfig({
                             ...config,
-                            openeaiApiKey: e.target.value,
+                            groqApiKey: e.target.value,
+                          })
+                        }
+                        className="bg-[#111111] px-3 py-2 flex items-center overflow-hidden border border-[#1C1C1C] text-white rounded-lg text-sm"
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm text-white/70">OpenAI API Key</p>
+                      <input
+                        type="text"
+                        placeholder="OpenAI API Key"
+                        defaultValue={config.openaiApiKey}
+                        onChange={(e) =>
+                          setConfig({
+                            ...config,
+                            openaiApiKey: e.target.value,
                           })
                         }
                         className="bg-[#111111] px-3 py-2 flex items-center overflow-hidden border border-[#1C1C1C] text-white rounded-lg text-sm"
