@@ -20,10 +20,16 @@ interface SearxngSearchResult {
 export const searchSearxng = async (
   query: string,
   opts?: SearxngSearchOptions,
+  domain?: string,
 ) => {
   const searxngURL = getSearxngApiEndpoint();
 
   const url = new URL(`${searxngURL}/search?format=json`);
+  if (domain) {
+    // this is google syntax...
+    query = `site:${domain} ${query}`;
+  }
+
   url.searchParams.append('q', query);
 
   if (opts) {

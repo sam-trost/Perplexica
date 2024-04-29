@@ -101,7 +101,10 @@ type BasicChainInput = {
   query: string;
 };
 
-const createBasicWebSearchRetrieverChain = (llm: BaseChatModel) => {
+const createBasicWebSearchRetrieverChain = (
+  llm: BaseChatModel,
+  domain?: string,
+) => {
   return RunnableSequence.from([
     PromptTemplate.fromTemplate(basicSearchRetrieverPrompt),
     llm,
@@ -111,9 +114,13 @@ const createBasicWebSearchRetrieverChain = (llm: BaseChatModel) => {
         return { query: '', docs: [] };
       }
 
-      const res = await searchSearxng(input, {
-        language: 'en',
-      });
+      const res = await searchSearxng(
+        input,
+        {
+          language: 'en',
+        },
+        domain,
+      );
 
       const documents = res.results.map(
         (result) =>
@@ -135,8 +142,12 @@ const createBasicWebSearchRetrieverChain = (llm: BaseChatModel) => {
 const createBasicWebSearchAnsweringChain = (
   llm: BaseChatModel,
   embeddings: Embeddings,
+  domain?: string,
 ) => {
-  const basicWebSearchRetrieverChain = createBasicWebSearchRetrieverChain(llm);
+  const basicWebSearchRetrieverChain = createBasicWebSearchRetrieverChain(
+    llm,
+    domain,
+  );
 
   const processDocs = async (docs: Document[]) => {
     return docs
@@ -155,31 +166,42 @@ const createBasicWebSearchAnsweringChain = (
       return docs;
     }
 
-    const docsWithContent = docs.filter(
-      (doc) => doc.pageContent && doc.pageContent.length > 0,
-    );
+    try {
+      const docsWithContent = docs.filter(
+        (doc) => doc.pageContent && doc.pageContent.length > 0,
+      );
 
-    const [docEmbeddings, queryEmbedding] = await Promise.all([
-      embeddings.embedDocuments(docsWithContent.map((doc) => doc.pageContent)),
-      embeddings.embedQuery(query),
-    ]);
+      const [docEmbeddings, queryEmbedding] = await Promise.all([
+        embeddings.embedDocuments(
+          docsWithContent.map((doc) => doc.pageContent),
+        ),
+        embeddings.embedQuery(query),
+      ]);
 
-    const similarity = docEmbeddings.map((docEmbedding, i) => {
-      const sim = computeSimilarity(queryEmbedding, docEmbedding);
+      const similarity = docEmbeddings.map((docEmbedding, i) => {
+        const sim = computeSimilarity(queryEmbedding, docEmbedding);
 
-      return {
-        index: i,
-        similarity: sim,
-      };
-    });
+        return {
+          index: i,
+          similarity: sim,
+        };
+      });
 
-    const sortedDocs = similarity
-      .sort((a, b) => b.similarity - a.similarity)
-      .filter((sim) => sim.similarity > 0.5)
-      .slice(0, 15)
-      .map((sim) => docsWithContent[sim.index]);
+      const sortedDocs = similarity.sort((a, b) => b.similarity - a.similarity);
 
-    return sortedDocs;
+      const filteredDocs = sortedDocs.filter((sim) => sim.similarity > 0.5);
+
+      // If there are no docs with similarity > 0.5, return the top 15 docs
+      let rerankedDocs = sortedDocs;
+      if (filteredDocs.length > 0) {
+        rerankedDocs = filteredDocs;
+      }
+
+      return rerankedDocs.slice(0, 15).map((sim) => docsWithContent[sim.index]);
+    } catch (err) {
+      console.error('Error in reranking docs');
+      console.error(err);
+    }
   };
 
   return RunnableSequence.from([
@@ -216,6 +238,7 @@ const basicWebSearch = (
   history: BaseMessage[],
   llm: BaseChatModel,
   embeddings: Embeddings,
+  domain?: string,
 ) => {
   const emitter = new eventEmitter();
 
@@ -223,6 +246,7 @@ const basicWebSearch = (
     const basicWebSearchAnsweringChain = createBasicWebSearchAnsweringChain(
       llm,
       embeddings,
+      domain,
     );
 
     const stream = basicWebSearchAnsweringChain.streamEvents(
@@ -252,8 +276,9 @@ const handleWebSearch = (
   history: BaseMessage[],
   llm: BaseChatModel,
   embeddings: Embeddings,
+  domain: string,
 ) => {
-  const emitter = basicWebSearch(message, history, llm, embeddings);
+  const emitter = basicWebSearch(message, history, llm, embeddings, domain);
   return emitter;
 };
 

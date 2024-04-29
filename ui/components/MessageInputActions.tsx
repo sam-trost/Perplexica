@@ -5,12 +5,14 @@ import {
   Globe,
   Pencil,
   ScanEye,
+  Search,
   SwatchBook,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Popover, Switch, Transition } from '@headlessui/react';
 import { SiReddit, SiYoutube } from '@icons-pack/react-simple-icons';
 import { Fragment } from 'react';
+import TextareaAutosize from 'react-textarea-autosize';
 
 export const Attach = () => {
   return (
@@ -29,6 +31,12 @@ const focusModes = [
     title: 'All',
     description: 'Searches across all of the internet',
     icon: <Globe size={20} />,
+  },
+  {
+    key: 'webSearchDomain',
+    title: 'Domain',
+    description: 'Searches a specific domain',
+    icon: <Search size={20} />,
   },
   {
     key: 'academicSearch',
@@ -77,9 +85,13 @@ const focusModes = [
 export const Focus = ({
   focusMode,
   setFocusMode,
+  domain,
+  setDomain,
 }: {
   focusMode: string;
   setFocusMode: (mode: string) => void;
+  domain: string;
+  setDomain: (domain: string) => void;
 }) => {
   return (
     <Popover className="fixed w-full max-w-[15rem] md:max-w-md lg:max-w-lg">
@@ -99,6 +111,17 @@ export const Focus = ({
           <ScanEye />
         )}
       </Popover.Button>
+
+      {focusMode === 'webSearchDomain' && (
+        <TextareaAutosize
+          value={domain}
+          onChange={(e) => setDomain(e.target.value)}
+          minRows={2}
+          className="w-full text-sm text-white bg-transparent resize-none placeholder:text-white/50 focus:outline-none max-h-24 lg:max-h-36 xl:max-h-48"
+          placeholder="https://www.wikipedia.org"
+        />
+      )}
+
       <Transition
         as={Fragment}
         enter="transition ease-out duration-150"
@@ -130,7 +153,7 @@ export const Focus = ({
                   {mode.icon}
                   <p className="text-sm font-medium">{mode.title}</p>
                 </div>
-                <p className="text-white/70 text-xs">{mode.description}</p>
+                <p className="text-xs text-white/70">{mode.description}</p>
               </Popover.Button>
             ))}
           </div>
@@ -148,7 +171,7 @@ export const CopilotToggle = ({
   setCopilotEnabled: (enabled: boolean) => void;
 }) => {
   return (
-    <div className="group flex flex-row items-center space-x-1 active:scale-95 duration-200 transition cursor-pointer">
+    <div className="flex flex-row items-center space-x-1 transition duration-200 cursor-pointer group active:scale-95">
       <Switch
         checked={copilotEnabled}
         onChange={setCopilotEnabled}

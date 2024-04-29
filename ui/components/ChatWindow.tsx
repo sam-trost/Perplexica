@@ -42,6 +42,7 @@ const ChatWindow = () => {
   const [loading, setLoading] = useState(false);
   const [messageAppeared, setMessageAppeared] = useState(false);
   const [focusMode, setFocusMode] = useState('webSearch');
+  const [domain, setDomain] = useState('');
 
   const sendMessage = async (message: string) => {
     if (loading) return;
@@ -57,6 +58,7 @@ const ChatWindow = () => {
         type: 'message',
         content: message,
         focusMode: focusMode,
+        domain: domain,
         history: [...chatHistory, ['human', message]],
       }),
     );
@@ -170,6 +172,8 @@ const ChatWindow = () => {
           sendMessage={sendMessage}
           focusMode={focusMode}
           setFocusMode={setFocusMode}
+          domain={domain}
+          setDomain={setDomain}
         />
       )}
     </div>

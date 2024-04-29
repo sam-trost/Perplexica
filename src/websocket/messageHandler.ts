@@ -15,10 +15,12 @@ type Message = {
   copilot: boolean;
   focusMode: string;
   history: Array<[string, string]>;
+  domain?: string;
 };
 
 const searchHandlers = {
   webSearch: handleWebSearch,
+  webSearchDomain: handleWebSearch,
   academicSearch: handleAcademicSearch,
   writingAssistant: handleWritingAssistant,
   wolframAlphaSearch: handleWolframAlphaSearch,
@@ -90,11 +92,17 @@ export const handleMessage = async (
     if (parsedMessage.type === 'message') {
       const handler = searchHandlers[parsedMessage.focusMode];
       if (handler) {
+        const domain =
+          parsedMessage.focusMode === 'webSearchDomain'
+            ? parsedMessage.domain
+            : undefined;
+
         const emitter = handler(
           parsedMessage.content,
           history,
           llm,
           embeddings,
+          domain,
         );
         handleEmitterEvents(emitter, ws, id);
       } else {

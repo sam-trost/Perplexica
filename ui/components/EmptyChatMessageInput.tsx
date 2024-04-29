@@ -7,10 +7,14 @@ const EmptyChatMessageInput = ({
   sendMessage,
   focusMode,
   setFocusMode,
+  domain,
+  setDomain,
 }: {
   sendMessage: (message: string) => void;
   focusMode: string;
   setFocusMode: (mode: string) => void;
+  domain: string;
+  setDomain: (domain: string) => void;
 }) => {
   const [copilotEnabled, setCopilotEnabled] = useState(false);
   const [message, setMessage] = useState('');
@@ -36,15 +40,20 @@ const EmptyChatMessageInput = ({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           minRows={2}
-          className="bg-transparent placeholder:text-white/50 text-sm text-white resize-none focus:outline-none w-full max-h-24 lg:max-h-36 xl:max-h-48"
+          className="w-full text-sm text-white bg-transparent resize-none placeholder:text-white/50 focus:outline-none max-h-24 lg:max-h-36 xl:max-h-48"
           placeholder="Ask anything..."
         />
         <div className="flex flex-row items-center justify-between mt-4">
-          <div className="flex flex-row items-center space-x-1 -mx-2">
-            <Focus focusMode={focusMode} setFocusMode={setFocusMode} />
+          <div className="flex flex-row items-center -mx-2 space-x-1">
+            <Focus
+              focusMode={focusMode}
+              setFocusMode={setFocusMode}
+              domain={domain}
+              setDomain={setDomain}
+            />
             {/* <Attach /> */}
           </div>
-          <div className="flex flex-row items-center space-x-4 -mx-2">
+          <div className="flex flex-row items-center -mx-2 space-x-4">
             <CopilotToggle
               copilotEnabled={copilotEnabled}
               setCopilotEnabled={setCopilotEnabled}
